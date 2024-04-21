@@ -1,5 +1,4 @@
 import asyncpg
-import requests
 import pytest
 from pathlib import Path
 import sys
@@ -22,6 +21,6 @@ async def test_database_connection():
 
 
 @pytest.mark.asyncio
-async def test_mymusic_service_connection():
+async def test_admin_service_connection():
     r = await admin_status()
     assert r == {'message': 'service alive'}
