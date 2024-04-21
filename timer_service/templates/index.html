@@ -17,60 +17,94 @@
             font-family: Arial, sans-serif;
             font-size: 24px;
         }
+
         #time {
             margin-bottom: 20px;
             font-size: 48px;
         }
+
         input, button {
             padding: 10px;
             font-size: 16px;
             margin-top: 10px;
         }
+
         ul {
             list-style-type: none;
             padding: 0;
         }
+
         li {
             margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <h1 id="time"></h1>
-    <input type="text" id="inputText" placeholder="Enter some text here...">
-    <button onclick="saveTime()">Save</button>
-    <ul id="timeList">
-        {% for task in tasks %}
-        <li>{{ task.time }} - {{ task.text }}</li>
-        {% endfor %}
-    </ul>
+<h1 id="time"></h1>
+<input type="text" id="inputText" placeholder="Enter some text here...">
+<button onclick="saveTime()">Save</button>
+<button onclick="logout()">Logout</button>
+<ul id="timeList">
+    {% for task in tasks %}
+    <li>{{ task.time }} - {{ task.text }}</li>
+    {% endfor %}
+</ul>
 
-    <script>
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-            document.getElementById('time').textContent = timeString;
-        }
-        setInterval(updateTime, 1000);
+<script>
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString();
+        document.getElementById('time').textContent = timeString;
+    }
 
-        function saveTime() {
-            const text = document.getElementById('inputText').value;
-            fetch('/save', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'text=' + text
-            })
+    setInterval(updateTime, 1000);
+
+    function saveTime() {
+        const text = document.getElementById('inputText').value;
+        fetch('/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'text=' + text
+        })
             .then(response => response.json())
             .then(data => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${data.time} - ${data.text}`;
-                document.getElementById('timeList').appendChild(listItem);
-                document.getElementById('inputText').value = '';
+                updateTasks();  // Update the tasks list after saving
+                document.getElementById('inputText').value = '';  // Clear the input field after saving
             })
             .catch(error => console.error('Error:', error));
-        }
-    </script>
+    }
+
+    function updateTasks() {
+        fetch('/tasks')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);  // Добавлено для проверки данных
+                const tasksList = document.getElementById('timeList');
+                tasksList.innerHTML = '';  // Clear existing tasks
+                data.forEach(task => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${task.time} - ${task.text}`;
+                    tasksList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function logout() {
+        fetch('/logout', {
+            method: 'POST'
+        }).then(() => {
+            window.location.href = '/login';
+        }).catch(error => console.error('Error:', error));
+    }
+
+    // Вызов функции updateTasks при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function () {
+        updateTasks();
+    });
+
+</script>
 </body>
 </html>
