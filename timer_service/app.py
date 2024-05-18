@@ -12,8 +12,6 @@ session_local = scoped_session(sessionmaker(autocommit=False, autoflush=False, b
 Base = declarative_base()
 
 
-
-
 class Task(Base):
     __tablename__ = 'tasks_nikulin'
 
